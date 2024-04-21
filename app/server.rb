@@ -11,7 +11,15 @@ class YourRedisServer
 
     # Uncomment this block to pass the first stage
     server = TCPServer.new(@port)
-    client = server.accept
+    # accept ping command
+    loop do
+      client = server.accept
+      command = client.gets
+      if command == "PING\n"
+        client.write("+PONG\r\n")
+      end
+      client.close
+    end
   end
 end
 
