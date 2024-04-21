@@ -14,8 +14,8 @@ class YourRedisServer
     # accept ping command
     loop do
       Thread.start(server.accept) do |client|
-        command = client.gets
-        puts "Received: #{command}"
+        cmd = client.gets
+        puts "Received: #{cmd}"
         client.puts "+PONG\r\n"
         client.close
       end
