@@ -10,14 +10,13 @@ class YourRedisServer
     puts("Logs from your program will appear here!")
 
     # Uncomment this block to pass the first stage
-    server = TCPServer.new(@port)
-    # accept ping command
-    loop do
-        client = server.accept
-        cmd = client.gets
-        puts "Received: #{cmd}"
-        client.puts "+PONG\r\n"
-        client.close
+    servers = Socket.tcp_server_sockets(@port)
+    puts "Server started"
+    Socket.accept_loop(servers) do |connection|
+      while (line = connection.gets) do
+        connection.write("+PONG\r\n") if line.include?('ping')
+      end
+      connection.close
     end
   end
 end
