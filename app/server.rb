@@ -17,7 +17,6 @@ class YourRedisServer
         cmd = client.gets
         puts "Received: #{cmd}"
         client.puts "+PONG\r\n"
-        client.close
       end
     end
   end
