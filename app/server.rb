@@ -16,9 +16,7 @@ class YourRedisServer
       Thread.start(server.accept) do |client|
         command = client.gets
         puts "Received: #{command}"
-        if command == "PING\n"
-          client.write("+PONG\r\n")
-        end
+        client.puts "+PONG\r\n"
         client.close
       end
     end
