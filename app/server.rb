@@ -13,13 +13,14 @@ class YourRedisServer
     server = TCPServer.new(@port)
     # accept ping command
     loop do
-      client = server.accept
-      command = client.gets
-      puts "Received: #{command}"
-      if command == "PING\n"
-        client.write("+PONG\r\n")
+      Thread.start(server.accept) do |client|
+        command = client.gets
+        puts "Received: #{command}"
+        if command == "PING\n"
+          client.write("+PONG\r\n")
+        end
+        client.close
       end
-      client.close
     end
   end
 end
