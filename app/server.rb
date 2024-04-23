@@ -2,22 +2,32 @@ require "socket"
 
 class YourRedisServer
   def initialize(port)
-    @port = port
+    @server = TCPServer.new(port)
+    @clients = []
   end
 
   def start
-    # You can use print statements as follows for debugging, they'll be visible when running tests.
-    puts("Logs from your program will appear here!")
-
-    # Uncomment this block to pass the first stage
-    servers = Socket.tcp_server_sockets(@port)
-    puts "Server started"
-    Socket.accept_loop(servers) do |connection|
-      while (line = connection.gets) do
-        connection.write("+PONG\r\n") if line.include?('ping')
+    loop do
+      fds_to_watch = [@server, *@clients]
+      ready_fds = IO.select(fds_to_watch)
+      ready_fds.each do |fd|
+        case fd
+        when @server
+          accept_client
+        else
+          handle_client(fd)
+        end
       end
-      connection.close
     end
+  end
+
+  def accept_client
+    client = @server.accept
+    @clients << client
+  end
+
+  def handle_client(client)
+    client.write("+PONG\r\n")
   end
 end
 
