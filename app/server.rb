@@ -22,7 +22,7 @@ class YourRedisServer
   end
 
   def handle_client(client)
-    line = client.readPartial(1024)
+    line = client.readpartial(1024)
     puts 'line: ' + line
   end
 end
