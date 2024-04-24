@@ -10,12 +10,13 @@ class YourRedisServer
     loop do
       fds_to_watch = [@server, *@clients]
       ready_to_read, _, _ = IO.select(fds_to_watch)
-      puts "files: " + ready_to_read.length.to_s
       ready_to_read.each do |fd|
         case fd
         when @server
           @clients << @server.accept
+          puts "new client"
         else
+          puts "not server"
           handle_client(fd)
         end
       end
