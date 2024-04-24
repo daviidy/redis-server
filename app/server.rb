@@ -9,9 +9,8 @@ class YourRedisServer
   def start
     loop do
       fds_to_watch = [@server, *@clients]
-
       ready_to_read, _, _ = IO.select(fds_to_watch)
-      p ready_to_read.inspect
+      puts "files: " + ready_to_read.inspect
       ready_to_read.each do |fd|
         case fd
         when @server
