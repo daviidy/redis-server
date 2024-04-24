@@ -22,13 +22,11 @@ class YourRedisServer
   end
 
   def accept_client
-    client = @server.accept
-    @clients << client
-    p @clients
+    @clients << @server.accept
   end
 
   def handle_client(client)
-    client.readpartial(1024)
+    puts 'request = ' + client.gets
     client.write("+PONG\r\n")
   end
 end
