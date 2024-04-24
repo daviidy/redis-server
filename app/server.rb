@@ -27,6 +27,8 @@ class YourRedisServer
 
   def handle_client(client)
     client.write("+PONG\r\n") if client.gets === "ping"
+    client.close
+    @clients.delete(client)
   end
 end
 
