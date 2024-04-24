@@ -15,16 +15,12 @@ class YourRedisServer
       ready_to_read.each do |fd|
         case fd
         when @server
-          accept_client
+          @clients << @server.accept
         else
           handle_client(fd)
         end
       end
     end
-  end
-
-  def accept_client
-    @clients << @server.accept
   end
 
   def handle_client(client)
