@@ -26,8 +26,10 @@ class YourRedisServer
   end
 
   def handle_client(client)
-    puts "reading = " + client.readpartial(1024)
-    # client.write("+PONG\r\n") if line.include?("ping")
+    while line = client.readpartial(1024)
+      puts "line " + line
+      client.write("+PONG\r\n") if line.include?("ping")
+    end
   end
 end
 
