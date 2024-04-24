@@ -6,7 +6,7 @@ class YourRedisServer
     @clients = []
   end
 
-  def start
+  def listen
     loop do
       fds_to_watch = [@server, *@clients]
       ready_to_read, _, _ = IO.select(fds_to_watch)
@@ -14,9 +14,7 @@ class YourRedisServer
         case fd
         when @server
           @clients << @server.accept
-          puts "new client"
         else
-          puts "not server"
           handle_client(fd)
         end
       end
@@ -24,10 +22,9 @@ class YourRedisServer
   end
 
   def handle_client(client)
-    while line = client.readpartial(1024)
-      client.write("+PONG\r\n") if line.include?("ping")
-    end
+    line = client.readPartial(1024)
+    puts 'line: ' + line
   end
 end
 
-YourRedisServer.new(6379).start
+YourRedisServer.new(6379).listen
