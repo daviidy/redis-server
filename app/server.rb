@@ -27,7 +27,10 @@ class YourRedisServer
 
   def handle_client(client)
     while line = client.readpartial(1024)
-      puts "line " + line.include?("ping") ? "yes" : "not ping"
+      if line.include?("ping")
+        puts "Received ping"
+      else puts "No ping"
+      end
       client.write("+PONG\r\n") if line.include?("ping")
     end
   end
