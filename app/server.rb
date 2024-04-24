@@ -15,7 +15,6 @@ class YourRedisServer
         when @server
           accept_client
         else
-          p "client fd = #{fd.inspect}"
           handle_client(fd)
         end
       end
@@ -27,8 +26,11 @@ class YourRedisServer
   end
 
   def handle_client(client)
-    puts 'client request = ' + client.gets
-    client.write("+PONG\r\n") if client.gets === "ping"
+    while line = client.gets
+      p 'line: ', line
+      client.write("+PONG\r\n") if line === "ping"
+    end
+    client.close
   end
 end
 
