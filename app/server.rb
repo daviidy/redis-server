@@ -14,11 +14,10 @@ class YourRedisServer
       p ready_to_read.inspect
       ready_to_read.each do |fd|
         case fd
-          when @server
+        when @server
           accept_client
         else
           handle_client(fd)
-          fd.
         end
       end
     end
