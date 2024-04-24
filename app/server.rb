@@ -1,38 +1,76 @@
 require "socket"
 
+class Command
+  attr_reader :action
+  attr_reader :args
+  def initialize(action, args)
+    @action = action
+    @args = args
+  end
+end
+class Client
+  attr_reader :socket
+  def initialize(socket)
+    @socket = socket
+    @buffer = ""
+  end
+  def consume_command
+    array = RESPDecoder.decode(@buffer)
+    @buffer = ""
+    Command.new(array[0], array[1..-1])
+  rescue IncompleteRESP
+    nil
+  end
+  def read_available
+    @buffer += @socket.readpartial(1024)
+  end
+  def write(msg)
+    @socket.write(msg)
+  end
+end
+
 class YourRedisServer
   def initialize(port)
     @server = TCPServer.new(port)
-    @clients = []
+    @sockets_to_clients = {}
   end
 
   def listen
     loop do
-      fds_to_watch = [@server, *@clients]
+      fds_to_watch = [@server, *@sockets_to_clients.keys]
       ready_to_read, _, _ = IO.select(fds_to_watch)
       ready_to_read.each do |fd|
         case fd
         when @server
-          @clients << @server.accept
+          client_socket = @server.accept
+          @sockets_to_clients[client_socket] = Client.new(client_socket)
         else
-          handle_client(fd)
+          client = @sockets_to_clients[fd]
+          handle_client(client)
         end
       end
     end
   end
 
   def handle_client(client)
-    line = client.readpartial(1024)
-    commands = line.split
-    commands.each do |command|
-      if command === "ping"
-        client.write("+PONG\r\n")
-      end
+    client.read_available
+    loop do
+      command = client.consume_command
+      break unless command
+      handle_command(client, command)
     end
-    #rescue end of file error
-  rescue EOFError
-    @clients.delete(client)
-    client.close
+    rescue Errno::ECONNRESET, EOFError
+      @sockets_to_clients.delete(client.socket)
+  end
+
+  def handle_command(client, command)
+    if command.action == "ping"
+      client.write("+PONG\r\n")
+    elsif command.action == "echo"
+      client.write("+#{command.args[0]}\r\n")
+    else
+      raise RuntimeError.new("Unhandled command: #{command.action}")
+    end
   end
 end
 
