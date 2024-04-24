@@ -29,7 +29,10 @@ class YourRedisServer
         client.write("+PONG\r\n")
       end
     end
-    
+    #rescue end of file error
+  rescue EOFError
+    @clients.delete(client)
+    client.close
   end
 end
 
