@@ -15,7 +15,8 @@ class YourRedisServer
         when @server
           accept_client
         else
-          handle_client(client)
+          p "client fd = #{fd}"
+          handle_client(fd)
         end
       end
     end
