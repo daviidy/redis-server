@@ -23,7 +23,8 @@ class YourRedisServer
 
   def handle_client(client)
     line = client.readpartial(1024)
-    puts 'line: ' + line
+    command, *args = line.split
+    puts 'command:', command
   end
 end
 
