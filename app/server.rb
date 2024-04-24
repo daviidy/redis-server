@@ -23,14 +23,12 @@ class YourRedisServer
 
   def accept_client
     @clients << @server.accept
-    p 'client connected: ' + @clients.inspect
   end
 
   def handle_client(client)
-    while line = client.gets
+    while line = client.readpartial(1024)
       client.write("+PONG\r\n") if line.include?("ping")
     end
-    client.close
   end
 end
 
