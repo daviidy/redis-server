@@ -27,7 +27,7 @@ class YourRedisServer
   end
 
   def handle_client(client)
-    put 'client request = ' + client.gets
+    puts 'client request = ' + client.gets
     client.write("+PONG\r\n") if client.gets === "ping"
   end
 end
