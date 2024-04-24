@@ -9,14 +9,16 @@ class YourRedisServer
   def start
     loop do
       fds_to_watch = [@server, *@clients]
-      p fds_to_watch.inspect
+
       ready_to_read, _, _ = IO.select(fds_to_watch)
+      p ready_to_read.inspect
       ready_to_read.each do |fd|
         case fd
-        when @server
+          when @server
           accept_client
         else
           handle_client(fd)
+          fd.
         end
       end
     end
