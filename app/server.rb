@@ -15,7 +15,7 @@ class YourRedisServer
         when @server
           accept_client
         else
-          p "client fd = #{fd}"
+          p "client fd = #{fd.inspect}"
           handle_client(fd)
         end
       end
