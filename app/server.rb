@@ -9,6 +9,7 @@ class YourRedisServer
   def start
     loop do
       fds_to_watch = [@server, *@clients]
+      p fds_to_watch.inspect
       ready_to_read, _, _ = IO.select(fds_to_watch)
       ready_to_read.each do |fd|
         case fd
@@ -27,10 +28,6 @@ class YourRedisServer
 
   def handle_client(client)
     while line = client.readpartial(1024)
-      if line.include?("ping")
-        puts "Received ping"
-      else puts "No ping"
-      end
       client.write("+PONG\r\n") if line.include?("ping")
     end
   end
