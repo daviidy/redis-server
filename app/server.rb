@@ -25,15 +25,11 @@ class YourRedisServer
     line = client.readpartial(1024)
     commands = line.split
     commands.each do |command|
-      case command
-      when "ping"
+      if command === "ping"
         client.write("+PONG\r\n")
-        else
-        client.write("-ERR unknown command '#{command}'\r\n")
-        @clients.delete(client)
-        client.close
       end
     end
+    
   end
 end
 
