@@ -67,10 +67,10 @@ class YourRedisServer
 
   def handle_command(client, command)
 
-    if command.action == "ping"
+    if command.action == "PING"
       p "here ping"
       client.write("+PONG\r\n")
-    elsif command.action == "echo"
+    elsif command.action == "ECHO"
       client.write("+#{command.args[0]}\r\n")
     else
       raise RuntimeError.new("Unhandled command: #{command.action}")
