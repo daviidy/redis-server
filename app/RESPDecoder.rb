@@ -16,6 +16,7 @@ class RESPDecoder
     elsif first_char == "$"
       self.decode_bulk_string(resp_io)
     elsif first_char == "*"
+      puts "Array dave"
       self.decode_array(resp_io)
     else
       raise RuntimeError.new("Unhandled first_char: #{first_char}")
