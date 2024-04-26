@@ -66,8 +66,9 @@ class YourRedisServer
   end
 
   def handle_command(client, command)
-    p command.action
+
     if command.action == "ping"
+      p "here ping"
       client.write("+PONG\r\n")
     elsif command.action == "echo"
       client.write("+#{command.args[0]}\r\n")
