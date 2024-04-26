@@ -57,7 +57,7 @@ class YourRedisServer
   def handle_client(client)
     client.read_available
     loop do
-      command = client.consume_command
+      command = client.consume_command!
       break unless command
       handle_command(client, command)
     end
