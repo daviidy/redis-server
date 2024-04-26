@@ -47,7 +47,7 @@ class RESPDecoder
     # Recurse, using do_decode
     element_count.times.map { self.do_decode(resp_io) }
   end
-  +
+  
   def self.read_int_with_clrf(resp_io)
     int_with_clrf = resp_io.readline(sep = "\r\n")
     if int_with_clrf[-2..-1] != "\r\n"
