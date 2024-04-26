@@ -16,6 +16,7 @@ class Client
     @buffer = ""
   end
   def consume_command
+    puts "Buffer: #{@buffer}"
     array = RESPDecoder.decode(@buffer)
     @buffer = ""
     Command.new(array[0], array[1..-1])
