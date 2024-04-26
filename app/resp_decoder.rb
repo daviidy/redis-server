@@ -48,7 +48,7 @@ class RESPDecoder
   def self.decode_array(resp_io)
     element_count = read_int_with_clrf(resp_io)
     # Recurse, using do_decode
-    element_count.times.map { self.do_decode(resp_io) }
+    p element_count.times.map { self.do_decode(resp_io) }
   end
 
   def self.read_int_with_clrf(resp_io)

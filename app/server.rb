@@ -15,7 +15,7 @@ class Client
     @socket = socket
     @buffer = ""
   end
-  def consume_command
+  def consume_command!
     puts "Buffer: #{@buffer.inspect}"
     array = RESPDecoder.decode(@buffer)
     @buffer = ""
