@@ -66,6 +66,7 @@ class YourRedisServer
   end
 
   def handle_command(client, command)
+    p command.action
     if command.action == "ping"
       client.write("+PONG\r\n")
     elsif command.action == "echo"
