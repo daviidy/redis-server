@@ -11,13 +11,15 @@ class RESPDecoder
   end
   def self.do_decode(resp_io)
     first_char = resp_io.read(1)
+
     if first_char == "+"
       self.decode_simple_string(resp_io)
     elsif first_char == "$"
       self.decode_bulk_string(resp_io)
     elsif first_char == "*"
-      puts "Array dave"
       self.decode_array(resp_io)
+    elsif first_char.nil?
+      raise IncompleteRESP
     else
       raise RuntimeError.new("Unhandled first_char: #{first_char}")
     end
