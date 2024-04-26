@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require 'stringio'
 
 class IncompleteRESP < Exception; end
 
