@@ -1,4 +1,5 @@
 require "socket"
+require_relative "RESPDecoder"
 
 class Command
   attr_reader :action
