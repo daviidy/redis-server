@@ -77,7 +77,7 @@ class YourRedisServer
       @@data[command.args[0]] = command.args[1]
       client.write("+OK\r\n")
     elsif command.action == "GET"
-      client.write("#{@@data[command.args[0]] ? @@data[command.args[0]] : ''}")
+      client.write("#{@@data[command.args[0]] ? @@data[command.args[0]] : ''}\r\n")
     else
       raise RuntimeError.new("Unhandled command: #{command.action}")
     end
