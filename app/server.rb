@@ -32,6 +32,8 @@ class Client
 end
 
 class YourRedisServer
+  # create hash to store data from set command
+  @@data = {}
   def initialize(port)
     @server = TCPServer.new(port)
     @sockets_to_clients = {}
@@ -71,6 +73,9 @@ class YourRedisServer
       client.write("+PONG\r\n")
     elsif command.action == "ECHO"
       client.write("+#{command.args[0]}\r\n")
+    elsif command.action == "SET"
+      @@data[command.args[0]] = command.args[1]
+      client.write("+OK\r\n")
     else
       raise RuntimeError.new("Unhandled command: #{command.action}")
     end
