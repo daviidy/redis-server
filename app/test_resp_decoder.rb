@@ -42,9 +42,9 @@ class TestRESPDecoder < Minitest::Test
     assert_equal "OK", r.set("key_test", "test_value")
     assert_equal "test_value", r.get("key_test")
     # assert set with expiry and px
-    assert_equal "OK", r.set("key_test", "test_value", px: 2000)
+    assert_equal "OK", r.set("key_test", "test_value", px: 1000)
     # test command after expiry
-    sleep(1)
+    sleep(2)
     assert_nil r.get("key_test")
   end
 end

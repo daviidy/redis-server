@@ -33,7 +33,8 @@ class KeyValue
   end
 
   def get_key_value(key)
-    if @store[key].length > 1 && @store[key] && @store[key][1] <= millisecond_now
+    puts "val #{@store[key]}"
+    if @store[key].length > 1 && @store[key][1] > millisecond_now
       @store[key][0]
     elsif @store[key].length == 1
       @store[key][0]
