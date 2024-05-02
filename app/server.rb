@@ -33,7 +33,6 @@ class KeyValue
   end
 
   def get_key_value(key)
-    puts "val #{@store[key]}"
     if @store[key].length > 1 && @store[key][1] > millisecond_now
       @store[key][0]
     elsif @store[key].length == 1
@@ -112,21 +111,11 @@ class YourRedisServer
     elsif command.action.downcase == "echo"
       client.write("+#{command.args[0]}\r\n")
     elsif command.action.downcase == "set"
-      if command.args[2] && command.args[2].downcase == "px"
-        operation = @storage.add(command.args[0], command.args[1], command.args[3])
-        client.write("+#{operation}\r\n")
-      else
-        operation = @storage.add(command.args[0], command.args[1], 0)
-        client.write("+#{operation}\r\n")
-      end
+      operation = @storage.add(command.args[0], command.args[1], command.args[2]&.downcase == "px" ? command.args[3] : 0)
+      client.write("+#{operation}\r\n")
     elsif command.action.downcase == "get"
       value = @storage.get_key_value(command.args[0])
-      if value == "-1"
-        puts "value #{value}"
-        client.write("$#{value}\r\n")
-      else
-        client.write("$#{value.size}\r\n#{value}\r\n")
-      end
+      client.write("$#{value == "-1" ? value : "#{value.size}\r\n#{value}"}\r\n")
     else
       raise RuntimeError.new("Unhandled command: #{command.action}")
     end
