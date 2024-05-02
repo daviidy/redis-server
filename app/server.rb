@@ -1,5 +1,6 @@
 require "socket"
 require_relative "resp_decoder"
+require "date"
 
 class Command
   attr_reader :action
@@ -9,6 +10,45 @@ class Command
     @args = args
   end
 end
+
+# create a class to store key value pairs
+# the class should have a expiry variable
+# to set the expiry time for the key
+# if the key is not accessed for the expiry time
+# the key should be deleted
+class KeyValue
+  def initialize
+    @store = {}
+  end
+
+  def add(key, value, expiry = 0)
+    if expiry != 0
+      expiry_time = millisecond_now + expiry.to_i
+      @store[key] = [value, expiry_time]
+      "OK"
+    else
+      @store[key] = [value]
+      "OK"
+    end
+  end
+
+  def get_key_value(key)
+    if @store[key].length > 1 && @store[key] && @store[key][1] < millisecond_now
+      @store[key][0]
+    elsif @store[key].length == 1
+      @store[key][0]
+    else
+      "-1"
+    end
+  end
+
+  def millisecond_now
+    DateTime.now.strftime('%Q').to_i
+  end
+
+end
+
+
 class Client
   attr_reader :socket
   def initialize(socket)
@@ -16,7 +56,6 @@ class Client
     @buffer = ""
   end
   def consume_command!
-    puts "Buffer: #{@buffer.inspect}"
     array = RESPDecoder.decode(@buffer)
     @buffer = ""
     Command.new(array[0], array[1..-1])
@@ -32,11 +71,10 @@ class Client
 end
 
 class YourRedisServer
-  # create hash to store data from set command
-  @@data = {}
   def initialize(port)
     @server = TCPServer.new(port)
     @sockets_to_clients = {}
+    @storage = KeyValue.new
   end
 
   def listen
@@ -68,16 +106,26 @@ class YourRedisServer
   end
 
   def handle_command(client, command)
-
-    if command.action == "PING"
+    if command.action.downcase == "ping"
       client.write("+PONG\r\n")
-    elsif command.action == "ECHO"
+    elsif command.action.downcase == "echo"
       client.write("+#{command.args[0]}\r\n")
-    elsif command.action == "SET"
-      @@data[command.args[0]] = command.args[1]
-      client.write("+OK\r\n")
-    elsif command.action == "GET"
-      client.write("+#{@@data[command.args[0]] ? @@data[command.args[0]] : ''}\r\n")
+    elsif command.action.downcase == "set"
+      if command.args[2] && command.args[2].downcase == "px"
+        operation = @storage.add(command.args[0], command.args[1], command.args[3])
+        client.write("+#{operation}\r\n")
+      else
+        operation = @storage.add(command.args[0], command.args[1], 0)
+        client.write("+#{operation}\r\n")
+      end
+    elsif command.action.downcase == "get"
+      value = @storage.get_key_value(command.args[0])
+      if value == "-1"
+        puts "value #{value}"
+        client.write("$#{value}\r\n")
+      else
+        client.write("$#{value.size}\r\n#{value}\r\n")
+      end
     else
       raise RuntimeError.new("Unhandled command: #{command.action}")
     end

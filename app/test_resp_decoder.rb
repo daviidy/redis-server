@@ -2,6 +2,9 @@
 
 require "minitest/autorun"
 require_relative "resp_decoder"
+require "redis"
+
+SERVER_PORT = ENV["SERVER_PORT"] || 6379
 
 class TestRESPDecoder < Minitest::Test
   def test_simple_string
@@ -32,5 +35,16 @@ class TestRESPDecoder < Minitest::Test
     assert_raises(IncompleteRESP) { RESPDecoder.decode("*1\r\n") }
     assert_raises(IncompleteRESP) { RESPDecoder.decode("*1\r\n$4") }
     assert_raises(IncompleteRESP) { RESPDecoder.decode("*2\r\n$4\r\nECHO\r\n") }
+  end
+
+  def test_expiry
+    r = Redis.new(port: SERVER_PORT)
+    assert_equal "OK", r.set("key_test", "test_value")
+    assert_equal "test_value", r.get("key_test")
+    # assert set with expiry and px
+    assert_equal "OK", r.set("key_test", "test_value", px: 2000)
+    # test command after expiry
+    sleep(1)
+    assert_nil r.get("key_test")
   end
 end
