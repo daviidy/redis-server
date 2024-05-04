@@ -13,11 +13,13 @@ class Command
   end
 end
 
-# create a class to store key value pairs
-# the class should have a expiry variable
-# to set the expiry time for the key
-# if the key is not accessed for the expiry time
-# the key should be deleted
+class Info
+  def replication_info
+    "# Replication\r\nrole:master\r\n"
+  end
+end
+
+
 class KeyValue
   def initialize
     @store = {}
@@ -72,6 +74,7 @@ class YourRedisServer
     @server = TCPServer.new(port)
     @sockets_to_clients = {}
     @storage = KeyValue.new
+    @info = Info.new
   end
 
   def listen
@@ -113,6 +116,9 @@ class YourRedisServer
     elsif command.action.downcase == "get"
       value = @storage.get_key_value(command.args[0])
       client.write("$#{value == "-1" ? value : "#{value.size}\r\n#{value}"}\r\n")
+    elsif command.action.downcase == "info"
+      info = @info.replication_info
+      client.write("$#{info.size}\r\n#{info}\r\n")
     else
       raise RuntimeError.new("Unhandled command: #{command.action}")
     end

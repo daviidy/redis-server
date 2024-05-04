@@ -36,7 +36,7 @@ class TestRESPDecoder < Minitest::Test
   end
 
   def test_expiry
-    r = Redis.new(port: SERVER_PORT)
+    r = Redis.new(port: ENV['SERVER_PORT'])
     assert_equal "OK", r.set("key_test", "test_value")
     assert_equal "test_value", r.get("key_test")
     # assert set with expiry and px
@@ -45,7 +45,10 @@ class TestRESPDecoder < Minitest::Test
     sleep(2)
     assert_nil r.get("key_test")
   end
-  def test_server_start
-    assert system("ruby app/server.rb --port 6300")
+
+  def test_info_command
+    r = Redis.new(port: ENV['SERVER_PORT'])
+    info = r.info
+    assert_equal "master", info["role"]
   end
 end
