@@ -2,6 +2,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     bindata (2.4.15)
+    dotenv (3.1.1)
     minitest (5.22.3)
 
 PLATFORMS
@@ -12,6 +13,7 @@ PLATFORMS
 
 DEPENDENCIES
   bindata (~> 2.4)
+  dotenv
   minitest
 
 BUNDLED WITH

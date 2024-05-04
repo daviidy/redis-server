@@ -1,6 +1,8 @@
 require "socket"
 require_relative "resp_decoder"
 require "date"
+require 'dotenv'
+Dotenv.load
 
 class Command
   attr_reader :action
@@ -21,15 +23,10 @@ class KeyValue
     @store = {}
   end
 
-  def add(key, value, expiry = 0)
-    if expiry != 0
-      expiry_time = millisecond_now + expiry.to_i
-      @store[key] = [value, expiry_time]
-      "OK"
-    else
-      @store[key] = [value]
-      "OK"
-    end
+  def add(key, value, expiry)
+    expiry_time = expiry ? millisecond_now + expiry.to_i : expiry
+    @store[key] = [value, expiry_time].compact
+    "OK"
   end
 
   def get_key_value(key)
@@ -111,7 +108,7 @@ class YourRedisServer
     elsif command.action.downcase == "echo"
       client.write("+#{command.args[0]}\r\n")
     elsif command.action.downcase == "set"
-      operation = @storage.add(command.args[0], command.args[1], command.args[2]&.downcase == "px" ? command.args[3] : 0)
+      operation = @storage.add(command.args[0], command.args[1], command.args[2]&.downcase == "px" ? command.args[3] : nil)
       client.write("+#{operation}\r\n")
     elsif command.action.downcase == "get"
       value = @storage.get_key_value(command.args[0])
@@ -122,4 +119,6 @@ class YourRedisServer
   end
 end
 
-YourRedisServer.new(6379).listen
+port = ARGV[1] || ENV['SERVER_PORT']
+puts "Starting server on port #{port}"
+YourRedisServer.new(port).listen
