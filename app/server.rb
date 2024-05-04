@@ -14,8 +14,12 @@ class Command
 end
 
 class Info
+  def initialize(server)
+    @server = server
+  end
+
   def replication_info
-    "# Replication\r\nrole:master\r\n"
+    "# Replication\r\nrole:#{@server.role}\r\n"
   end
 end
 
@@ -70,11 +74,13 @@ class Client
 end
 
 class YourRedisServer
-  def initialize(port)
+  attr_reader :role
+  def initialize(port, role = "master")
     @server = TCPServer.new(port)
     @sockets_to_clients = {}
     @storage = KeyValue.new
-    @info = Info.new
+    @role = role
+    @info = Info.new(self)
   end
 
   def listen
@@ -126,5 +132,5 @@ class YourRedisServer
 end
 
 port = ARGV[1] || ENV['SERVER_PORT']
-puts "Starting server on port #{port}"
-YourRedisServer.new(port).listen
+role = ARGV[2] == "--replicaof" ? "slave" : "master"
+YourRedisServer.new(port, role).listen

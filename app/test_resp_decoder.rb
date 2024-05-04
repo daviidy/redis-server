@@ -3,6 +3,7 @@
 require "minitest/autorun"
 require_relative "resp_decoder"
 require "redis"
+require 'mocha/minitest'
 
 class TestRESPDecoder < Minitest::Test
   def test_simple_string
@@ -50,5 +51,18 @@ class TestRESPDecoder < Minitest::Test
     r = Redis.new(port: ENV['SERVER_PORT'])
     info = r.info
     assert_equal "master", info["role"]
+  end
+
+  def test_info_command_replica
+    # Mock the Redis server
+    @redis = mock('Redis')
+    # Stub the `new` method to return the mock server
+    Redis.stubs(:new).returns(@redis)
+    # Make the mock server return a hash with 'role' => 'slave'
+    @redis.stubs(:info).returns('role' => 'slave')
+
+    r = Redis.new(port: ENV['SERVER_PORT'])
+    info = r.info
+    assert_equal "slave", info["role"]
   end
 end

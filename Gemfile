@@ -11,3 +11,5 @@ gem "bindata", "~> 2.4"
 gem "minitest"
 
 gem 'dotenv'
+
+gem 'mocha'
