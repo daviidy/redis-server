@@ -65,4 +65,12 @@ class TestRESPDecoder < Minitest::Test
     info = r.info
     assert_equal "slave", info["role"]
   end
+
+  def test_info_command_with_replid_and_offset
+    r = Redis.new(port: ENV['SERVER_PORT'])
+    info = r.info
+    assert_equal "master", info["role"]
+    assert_equal "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb", info["master_replid"]
+    assert_equal "0", info["master_repl_offset"]
+  end
 end

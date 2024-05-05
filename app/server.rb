@@ -19,7 +19,7 @@ class Info
   end
 
   def replication_info
-    "# Replication\r\nrole:#{@server.role}\r\n"
+    "# Replication\r\nrole:#{@server.role}\r\nmaster_replid:#{@server.master_replid}\r\nmaster_repl_offset:#{@server.master_repl_offset}\r\n"
   end
 end
 
@@ -74,12 +74,14 @@ class Client
 end
 
 class YourRedisServer
-  attr_reader :role
+  attr_reader :role, :master_replid, :master_repl_offset
   def initialize(port, role = "master")
     @server = TCPServer.new(port)
     @sockets_to_clients = {}
     @storage = KeyValue.new
     @role = role
+    @master_replid = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
+    @master_repl_offset = 0
     @info = Info.new(self)
   end
 
