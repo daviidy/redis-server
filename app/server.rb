@@ -96,9 +96,9 @@ class YourRedisServer
     connection = TCPSocket.new(@master_host, @master_port)
     connection.puts("*1\r\n$4\r\nPING\r\n")
     # REPLCONF listening-port <PORT>
-    connection.puts("*3\r\n$7\r\nREPLCONF\r\n$15\r\nlistening-port\r\n$#{@port.to_s.size}\r\n#{@port}\r\n")
+    connection.puts("*3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n$#{@port.to_s.size}\r\n#{@port}\r\n")
     # REPLCONF capa psync2
-    connection.puts("*3\r\n$7\r\nREPLCONF\r\n$4\r\ncapa\r\n$6\r\npsync2\r\n")
+    connection.puts("*3\r\n$8\r\nREPLCONF\r\n$4\r\ncapa\r\n$6\r\npsync2\r\n")
   rescue Errno::ECONNREFUSED => e
     puts "Master not available: #{e.message}"
   end
