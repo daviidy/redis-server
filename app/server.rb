@@ -81,6 +81,7 @@ class YourRedisServer
     @sockets_to_clients = {}
     @storage = KeyValue.new
     @role = role
+    @port = port
     @master_host = master_host
     @master_port = master_port
     @master_replid = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
