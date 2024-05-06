@@ -104,7 +104,7 @@ class YourRedisServer
         case fd
         when @server
           client_socket = @server.accept
-          @sockets_to_clients[client_socket] = Client.new(client_socket, @role, @master_host, @master_port
+          @sockets_to_clients[client_socket] = Client.new(client_socket, @role, @master_host, @master_port)
         else
           client = @sockets_to_clients[fd]
           handle_client(client)
