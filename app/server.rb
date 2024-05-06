@@ -54,17 +54,9 @@ end
 
 class Client
   attr_reader :socket
-  def initialize(socket, server_role, master_host, master_port)
+  def initialize(socket)
     @socket = socket
     @buffer = ""
-    if server_role == "slave"
-      @master_socket = TCPSocket.new(master_host, master_port)
-      send_ping(@master_socket)
-    end
-  end
-
-  def send_ping(socket)
-    socket.write("*1\r\n$4\r\nPING\r\n")
   end
 
   def consume_command!
@@ -94,6 +86,17 @@ class YourRedisServer
     @master_replid = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
     @master_repl_offset = 0
     @info = Info.new(self)
+    if master_port && master_host
+      do_handshake
+    end
+  end
+
+  def do_handshake
+    # send PING
+    connection = TCPSocket.new(@master_host, @master_port)
+    connection.puts("*1\r\n$4\r\nPING\r\n")
+  rescue Errno::ECONNREFUSED => e
+    puts "Master not available: #{e.message}"
   end
 
   def listen
@@ -104,7 +107,7 @@ class YourRedisServer
         case fd
         when @server
           client_socket = @server.accept
-          @sockets_to_clients[client_socket] = Client.new(client_socket, @role, @master_host, @master_port)
+          @sockets_to_clients[client_socket] = Client.new(client_socket)
         else
           client = @sockets_to_clients[fd]
           handle_client(client)
