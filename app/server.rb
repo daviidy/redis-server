@@ -97,7 +97,7 @@ class YourRedisServer
     connection.puts("*1\r\n$4\r\nPING\r\n")
     pong_resp = connection.gets.chomp
     if pong_resp == "+PONG"
-      response = "*3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n$#{@port.to_s.size}\r\n#{@port}\r\n"
+      response = "*3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n$#{@port.to_s.length}\r\n#{@port}\r\n"
       connection.puts(response)
       response = "*3\r\n$8\r\nREPLCONF\r\n$4\r\ncapa\r\n$6\r\npsync2\r\n"
       connection.puts(response)
