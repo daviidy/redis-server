@@ -75,7 +75,7 @@ class Client
 end
 
 class YourRedisServer
-  attr_reader :role, :master_replid, :master_repl_offset
+  attr_reader :role, :master_replid, :master_repl_offset, :port
   def initialize(port, role = "master", master_host = nil, master_port = nil)
     @server = TCPServer.new(port)
     @sockets_to_clients = {}
@@ -95,6 +95,10 @@ class YourRedisServer
     # send PING
     connection = TCPSocket.new(@master_host, @master_port)
     connection.puts("*1\r\n$4\r\nPING\r\n")
+    # REPLCONF listening-port <PORT>
+    connection.puts("*3\r\n$7\r\nREPLCONF\r\n$15\r\nlistening-port\r\n$#{@port.size}\r\n#{@port}\r\n")
+    # REPLCONF capa psync2
+    connection.puts("*3\r\n$7\r\nREPLCONF\r\n$4\r\ncapa\r\n$6\r\npsync2\r\n")
   rescue Errno::ECONNREFUSED => e
     puts "Master not available: #{e.message}"
   end
@@ -141,6 +145,8 @@ class YourRedisServer
     elsif command.action.downcase == "info"
       info = @info.replication_info
       client.write("$#{info.size}\r\n#{info}\r\n")
+    elsif command.action.downcase == "repliconf"
+      client.write("+OK\r\n")
     else
       raise RuntimeError.new("Unhandled command: #{command.action}")
     end
