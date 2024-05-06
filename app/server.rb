@@ -54,10 +54,19 @@ end
 
 class Client
   attr_reader :socket
-  def initialize(socket)
+  def initialize(socket, server_role, master_host, master_port)
     @socket = socket
     @buffer = ""
+    if server_role == "slave"
+      @master_socket = TCPSocket.new(master_host, master_port)
+      send_ping(@master_socket)
+    end
   end
+
+  def send_ping(socket)
+    socket.write("*1\r\n$4\r\nPING\r\n")
+  end
+
   def consume_command!
     array = RESPDecoder.decode(@buffer)
     @buffer = ""
@@ -75,11 +84,13 @@ end
 
 class YourRedisServer
   attr_reader :role, :master_replid, :master_repl_offset
-  def initialize(port, role = "master")
+  def initialize(port, role = "master", master_host = nil, master_port = nil)
     @server = TCPServer.new(port)
     @sockets_to_clients = {}
     @storage = KeyValue.new
     @role = role
+    @master_host = master_host
+    @master_port = master_port
     @master_replid = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
     @master_repl_offset = 0
     @info = Info.new(self)
@@ -93,7 +104,7 @@ class YourRedisServer
         case fd
         when @server
           client_socket = @server.accept
-          @sockets_to_clients[client_socket] = Client.new(client_socket)
+          @sockets_to_clients[client_socket] = Client.new(client_socket, @role, @master_host, @master_port
         else
           client = @sockets_to_clients[fd]
           handle_client(client)
@@ -135,4 +146,6 @@ end
 
 port = ARGV[1] || ENV['SERVER_PORT']
 role = ARGV[2] == "--replicaof" ? "slave" : "master"
-YourRedisServer.new(port, role).listen
+master_host = ARGV[2] == "--replicaof" ? ARGV[3] : nil
+master_port = ARGV[2] == "--replicaof" ? ARGV[4] : nil
+YourRedisServer.new(port, role, master_host, master_port).listen
