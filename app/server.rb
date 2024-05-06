@@ -98,9 +98,9 @@ class YourRedisServer
     pong_resp = connection.gets.chomp
     if pong_resp == "+PONG"
       response = "*3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n$#{@port.to_s.size}\r\n#{@port}\r\n"
-      master.puts(response)
+      connection.puts(response)
       response = "*3\r\n$8\r\nREPLCONF\r\n$4\r\ncapa\r\n$6\r\npsync2\r\n"
-      master.puts(response)
+      connection.puts(response)
     else
       puts "Unexpected response received from master server: #{pong_resp}. Aborting replication configuration."
     end
