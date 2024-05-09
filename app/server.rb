@@ -102,6 +102,7 @@ class YourRedisServer
       connection.puts(response)
       response = "*3\r\n$8\r\nREPLCONF\r\n$4\r\ncapa\r\n$6\r\npsync2\r\n"
       connection.puts(response)
+      send_psync(connection)
     else
       puts "Unexpected response received from master server: #{pong_resp}. Aborting replication configuration."
     end
@@ -155,6 +156,17 @@ class YourRedisServer
       client.write("+OK\r\n")
     else
       raise RuntimeError.new("Unhandled command: #{command.action}")
+    end
+  end
+
+  def send_psync(connection)
+    psync_command = "*3\r\n$5\r\nPSYNC\r\n$1\r\n?\r\n$2\r\n-1\r\n"
+    connection.puts(psync_command)
+    response = connection.gets.chomp
+    if response.start_with?("+FULLRESYNC")
+      puts "Received FULLRESYNC from master."
+    else
+      puts "Unexpected response received from master server: #{response}. Aborting replication configuration."
     end
   end
 end
