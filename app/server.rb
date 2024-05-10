@@ -163,6 +163,7 @@ class YourRedisServer
       info = @info.replication_info
       client.write("$#{info.size}\r\n#{info}\r\n")
     elsif command.action.downcase == "repliconf"
+      # receive handshake as master
       client.write("+OK\r\n")
     else
       raise RuntimeError.new("Unhandled command: #{command.action}")
