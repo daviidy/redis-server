@@ -162,7 +162,7 @@ class YourRedisServer
     elsif command.action.downcase == "info"
       info = @info.replication_info
       client.write("$#{info.size}\r\n#{info}\r\n")
-    elsif command.action.downcase == "repliconf"
+    elsif command.action.downcase == "replconf"
       # receive handshake as master
       client.write("+OK\r\n")
     else
