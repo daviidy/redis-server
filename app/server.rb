@@ -165,6 +165,13 @@ class YourRedisServer
     elsif command.action.downcase == "replconf"
       # receive handshake as master
       client.write("+OK\r\n")
+    elsif command.action.downcase == "psync"
+      if command.args[0] == "?" && command.args[1] == "-1"
+        client.write("+FULLRESYNC #{@master_replid} #{@master_repl_offset}\r\n")
+      else
+        raise RuntimeError.new("Unhandled PSYNC command: #{command.args}")
+      end
+
     else
       raise RuntimeError.new("Unhandled command: #{command.action}")
     end
