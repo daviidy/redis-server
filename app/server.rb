@@ -168,6 +168,7 @@ class YourRedisServer
     elsif command.action.downcase == "psync"
       if command.args[0] == "?" && command.args[1] == "-1"
         client.write("+FULLRESYNC #{@master_replid} #{@master_repl_offset}\r\n")
+        send_empty_rdb(client)
       else
         raise RuntimeError.new("Unhandled PSYNC command: #{command.args}")
       end
@@ -175,6 +176,15 @@ class YourRedisServer
     else
       raise RuntimeError.new("Unhandled command: #{command.action}")
     end
+  end
+
+  def send_empty_rdb(client)
+    # An empty RDB file in hex representation
+    empty_rdb_hex = "524544495330303131fa0972656469732d76657205372e322e30fa0a72656469732d62697473c040fa056374696d65c26d08bc65fa08757365642d6d656dc2b0c41000fa08616f662d62617365c000fff06e3bfec0ff5aa2"
+    # Convert the hex representation to binary
+    empty_rdb = [empty_rdb_hex].pack("H*")
+    # Send the empty RDB file as a RESP Bulk String
+    client.write("$#{empty_rdb.bytesize}\r\n#{empty_rdb}")
   end
 end
 
