@@ -86,6 +86,7 @@ class YourRedisServer
     @master_port = master_port
     @master_replid = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
     @master_repl_offset = 0
+    @replica_connections = []
     @info = Info.new(self)
     if master_port && master_host
       do_handshake
@@ -142,10 +143,14 @@ class YourRedisServer
     loop do
       command = client.consume_command!
       break unless command
+      if @role == "master" && command.action.downcase == "psync"
+        @replica_connections << client
+      end
       handle_command(client, command)
     end
     rescue Errno::ECONNRESET, EOFError
       @sockets_to_clients.delete(client.socket)
+      @replica_connections.delete(client)
   end
 
   def handle_command(client, command)
@@ -156,6 +161,7 @@ class YourRedisServer
     elsif command.action.downcase == "set"
       operation = @storage.add(command.args[0], command.args[1], command.args[2]&.downcase == "px" ? command.args[3] : nil)
       client.write("+#{operation}\r\n")
+      propagate_command(command)
     elsif command.action.downcase == "get"
       value = @storage.get_key_value(command.args[0])
       client.write("$#{value == "-1" ? value : "#{value.size}\r\n#{value}"}\r\n")
@@ -172,7 +178,6 @@ class YourRedisServer
       else
         raise RuntimeError.new("Unhandled PSYNC command: #{command.args}")
       end
-
     else
       raise RuntimeError.new("Unhandled command: #{command.action}")
     end
@@ -185,6 +190,18 @@ class YourRedisServer
     empty_rdb = [empty_rdb_hex].pack("H*")
     # Send the empty RDB file as a RESP Bulk String
     client.write("$#{empty_rdb.bytesize}\r\n#{empty_rdb}")
+  end
+
+  def propagate_command(command)
+    # Check if the server is a master and has connected replicas
+    if @role == "master" && @replica_connections.any?
+      # Convert the command to a RESP Array
+      resp_command = "*#{command.args.size + 1}\r\n$#{command.action.size}\r\n#{command.action}\r\n" + command.args.map { |arg| "$#{arg.size}\r\n#{arg}\r\n" }.join
+      # Send the command to all connected replicas
+      @replica_connections.each do |connection|
+        connection.write(resp_command)
+      end
+    end
   end
 end
 
