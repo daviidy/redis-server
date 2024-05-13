@@ -4,6 +4,9 @@ GEM
     bindata (2.4.15)
     dotenv (2.8.1)
     minitest (5.22.3)
+    mocha (2.2.0)
+      ruby2_keywords (>= 0.0.5)
+    ruby2_keywords (0.0.5)
 
 PLATFORMS
   aarch64-linux-musl
@@ -15,6 +18,7 @@ DEPENDENCIES
   bindata (~> 2.4)
   dotenv
   minitest
+  mocha
 
 BUNDLED WITH
    2.4.18

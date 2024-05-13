@@ -146,34 +146,34 @@ class YourRedisServer
       if @role == "master" && command.action.downcase == "psync"
         @replica_connections << client
       end
-      handle_command(client, command)
+      handle_command(client, command, @replica_connections.include?(client))
     end
     rescue Errno::ECONNRESET, EOFError
       @sockets_to_clients.delete(client.socket)
       @replica_connections.delete(client)
   end
 
-  def handle_command(client, command)
+  def handle_command(client, command, from_replica = false)
     if command.action.downcase == "ping"
-      client.write("+PONG\r\n")
+      client.write("+PONG\r\n") unless from_replica
     elsif command.action.downcase == "echo"
-      client.write("+#{command.args[0]}\r\n")
+      client.write("+#{command.args[0]}\r\n") unless from_replica
     elsif command.action.downcase == "set"
       operation = @storage.add(command.args[0], command.args[1], command.args[2]&.downcase == "px" ? command.args[3] : nil)
-      client.write("+#{operation}\r\n")
+      client.write("+#{operation}\r\n") unless from_replica
       propagate_command(command)
     elsif command.action.downcase == "get"
       value = @storage.get_key_value(command.args[0])
-      client.write("$#{value == "-1" ? value : "#{value.size}\r\n#{value}"}\r\n")
+      client.write("$#{value == "-1" ? value : "#{value.size}\r\n#{value}"}\r\n") unless from_replica
     elsif command.action.downcase == "info"
       info = @info.replication_info
-      client.write("$#{info.size}\r\n#{info}\r\n")
+      client.write("$#{info.size}\r\n#{info}\r\n") unless from_replica
     elsif command.action.downcase == "replconf"
       # receive handshake as master
-      client.write("+OK\r\n")
+      client.write("+OK\r\n") unless from_replica
     elsif command.action.downcase == "psync"
       if command.args[0] == "?" && command.args[1] == "-1"
-        client.write("+FULLRESYNC #{@master_replid} #{@master_repl_offset}\r\n")
+        client.write("+FULLRESYNC #{@master_replid} #{@master_repl_offset}\r\n") unless from_replica
         send_empty_rdb(client)
       else
         raise RuntimeError.new("Unhandled PSYNC command: #{command.args}")
