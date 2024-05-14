@@ -195,11 +195,11 @@ class YourRedisServer
   end
 
   def read_rdb(connection)
-    # Read the RDB file from the socket
-    # This is a placeholder implementation that simply reads and discards the data
-    # You should replace this with actual code to process the RDB file
-    while data = connection.read(1024)
-      # Process the data...
+    #skip the RDB file
+    while true
+      line = connection.gets.chomp
+      puts line
+      break
     end
   end
 
