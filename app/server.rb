@@ -195,12 +195,10 @@ class YourRedisServer
   end
 
   def read_rdb(connection)
-    #skip the RDB file
-    while true
-      line = connection.gets.chomp
-      puts line
-      break
-    end
+    #read the RDB file
+    rdb_length = connection.gets.chomp
+    rdb = connection.read(rdb_length.to_i)
+    puts "Received RDB file of length: #{rdb_length}"
   end
 
   def propagate_command(command)
