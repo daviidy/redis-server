@@ -96,6 +96,7 @@ class YourRedisServer
   def do_handshake
     # send PING
     connection = TCPSocket.new(@master_host, @master_port)
+    puts "Connected to master server."
     connection.puts("*1\r\n$4\r\nPING\r\n")
     pong_resp = connection.gets.chomp
     if pong_resp == "+PONG"
