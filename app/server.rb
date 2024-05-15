@@ -227,6 +227,7 @@ class YourRedisServer
   def handle_propagated_commands(connection)
     # Handle the propagated commands
     puts "Handling propagated commands..."
+    puts "Connection: #{connection}"
     while command_string = connection.gets
       # Decode the command string into a Command object
       command_array = RESPDecoder.decode(command_string.chomp)
