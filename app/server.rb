@@ -232,8 +232,18 @@ class YourRedisServer
 end
 
 port = ARGV[1] || ENV['SERVER_PORT']
-role = ARGV[2] == "--replicaof" ? "slave" : "master"
-master_host = ARGV[2] == "--replicaof" ? ARGV[3] : nil
+master_host = nil
+master_port = nil
+args = ARGV.dup
+replicaof_index = args.index("--replicaof")
+if replicaof_index
+  master_host_port = args[replicaof_index + 1].split(" ")
+  master_host, master_port = master_host_port[0], master_host_port[1]
+  role = "slave"
+  # Remove the processed arguments
+  args.slice!(replicaof_index, 2)
+else
+  role = "master"
+end
 puts "Master host: #{master_host}"
-master_port = ARGV[2] == "--replicaof" ? ARGV[4] : nil
 YourRedisServer.new(port, role, master_host, master_port).listen
