@@ -89,7 +89,6 @@ class YourRedisServer
     @replica_connections = []
     @info = Info.new(self)
     if master_port && master_host
-      puts "Connected to master server."
       do_handshake
     end
   end
@@ -111,7 +110,7 @@ class YourRedisServer
         response = connection.gets.chomp
         if response.start_with?("+FULLRESYNC")
           puts "Received FULLRESYNC from master."
-          read_rdb(connection)
+          # read_rdb(connection)
         else
           puts "Unexpected response received from master server: #{response}. Aborting replication configuration."
         end
@@ -235,5 +234,6 @@ end
 port = ARGV[1] || ENV['SERVER_PORT']
 role = ARGV[2] == "--replicaof" ? "slave" : "master"
 master_host = ARGV[2] == "--replicaof" ? ARGV[3] : nil
+puts "Master host: #{master_host}"
 master_port = ARGV[2] == "--replicaof" ? ARGV[4] : nil
 YourRedisServer.new(port, role, master_host, master_port).listen
