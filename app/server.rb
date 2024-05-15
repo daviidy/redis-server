@@ -231,8 +231,6 @@ class YourRedisServer
       # Decode the command string into a Command object
       command_array = RESPDecoder.decode(command_string.chomp)
       command = Command.new(command_array[0], command_array[1..-1])
-      puts "Received propagated command: #{command.action} #{command.args}"
-
       # Handle the command using the handle_command method
       handle_command(Client.new(connection), command, true)
     end
