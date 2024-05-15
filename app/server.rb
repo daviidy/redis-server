@@ -110,7 +110,7 @@ class YourRedisServer
         response = connection.gets.chomp
         if response.start_with?("+FULLRESYNC")
           puts "Received FULLRESYNC from master."
-          # read_rdb(connection)
+          read_rdb(connection)
         else
           puts "Unexpected response received from master server: #{response}. Aborting replication configuration."
         end
