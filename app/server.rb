@@ -209,8 +209,6 @@ class YourRedisServer
       buffer += data
       break if buffer.include?("\r\n*3\r\n$3\r\nSET\r\n") # Break when the first SET command is detected
     end
-    puts "Finished skipping RDB file: #{buffer}"
-
     # Handle any remaining commands in the buffer
     handle_propagated_commands(buffer, connection)
   end
@@ -228,6 +226,7 @@ class YourRedisServer
   end
 
   def handle_propagated_commands(buffer, connection)
+    puts "buffer: #{buffer}"
     while true
       # Read data from the connection into the buffer
       buffer += connection.read_nonblock(1024, exception: false) rescue nil
