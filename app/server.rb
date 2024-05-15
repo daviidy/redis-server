@@ -107,6 +107,7 @@ class YourRedisServer
       if repl_resp == "+OK"
         psync_command = "*3\r\n$5\r\nPSYNC\r\n$1\r\n?\r\n$2\r\n-1\r\n"
         connection.puts(psync_command)
+        connection.gets
         response = ""
         while line = connection.gets
           response += line
