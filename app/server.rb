@@ -203,13 +203,16 @@ class YourRedisServer
   end
 
   def read_rdb(connection)
-    # Read the RDB file from the socket
-    puts "Reading RDB file..."
-    while data = connection.read(1024)
-      puts "RDB data: #{data}"
+    buffer = ""
+    puts "Skipping RDB file..."
+    while data = connection.read_nonblock(1024, exception: false)
+      buffer += data
+      break if buffer.include?("\r\n*3\r\n$3\r\nSET\r\n") # Break when the first SET command is detected
     end
-    puts "Finished reading RDB file."
-    handle_propagated_commands(connection)
+    puts "Finished skipping RDB file."
+
+    # Handle any remaining commands in the buffer
+    handle_propagated_commands(buffer, connection)
   end
 
   def propagate_command(command)
@@ -224,18 +227,23 @@ class YourRedisServer
     end
   end
 
-  def handle_propagated_commands(connection)
-    # Handle the propagated commands
-    puts "Handling propagated commands..."
-    puts "Connection: #{connection}"
-    while command_string = connection.gets
-      # Decode the command string into a Command object
-      command_array = RESPDecoder.decode(command_string.chomp)
-      command = Command.new(command_array[0], command_array[1..-1])
-      # Handle the command using the handle_command method
-      handle_command(Client.new(connection), command, true)
+  def handle_propagated_commands(buffer, connection)
+    while true
+      # Read data from the connection into the buffer
+      buffer += connection.read_nonblock(1024, exception: false) rescue nil
+      break if buffer.empty?
+
+      # Try to process commands from the buffer
+      while (command_string = buffer.slice!(/\*.*\r\n/))
+
+        # Decode the command string into a Command object
+        command_array = RESPDecoder.decode(command_string.chomp)
+        command = Command.new(command_array[0], command_array[1..-1])
+
+        # Handle the command using the handle_command method
+        handle_command(Client.new(connection), command, true)
+      end
     end
-    puts "Finished handling propagated commands."
   end
 end
 
