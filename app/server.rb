@@ -226,7 +226,7 @@ class YourRedisServer
   end
 
   def handle_propagated_commands(buffer, connection)
-    puts "buffer: #{buffer}"
+    puts "buffer: #{buffer.inspect}"
     while true
       # Read data from the connection into the buffer
       buffer += connection.read_nonblock(1024, exception: false) rescue nil
