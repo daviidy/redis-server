@@ -176,6 +176,7 @@ class YourRedisServer
       client.write("+OK\r\n") unless from_master
     elsif command.action.downcase == "psync"
       if command.args[0] == "?" && command.args[1] == "-1"
+        puts "Received PSYNC command with ? and -1 arguments."
         client.write("+FULLRESYNC #{@master_replid} #{@master_repl_offset}\r\n") unless from_master
         send_empty_rdb(client)
       else
