@@ -206,10 +206,10 @@ class YourRedisServer
     # Read the RDB file from the socket
     puts "Reading RDB file..."
     while data = connection.read(1024)
-      # Process the data...
       puts "RDB data: #{data}"
     end
     puts "Finished reading RDB file."
+    handle_propagated_commands(connection)
   end
 
   def propagate_command(command)
