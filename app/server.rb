@@ -107,13 +107,13 @@ class YourRedisServer
       if repl_resp == "+OK"
         psync_command = "*3\r\n$5\r\nPSYNC\r\n$1\r\n?\r\n$2\r\n-1\r\n"
         connection.puts(psync_command)
-        response = ""
-        while line = connection.gets
-          response += line
-          break if line.start_with?("+FULLRESYNC")
-        end
-        puts "Response from master: #{response}"
-        if response.start_with?("+FULLRESYNC")
+        first_line = connection.gets
+        if first_line.start_with?("+FULLRESYNC")
+          response = first_line
+          while line = connection.gets
+            response += line
+          end
+          puts "Response from master: #{response}"
           puts "Received FULLRESYNC from master."
           read_rdb(connection)
         else
