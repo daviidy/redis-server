@@ -195,10 +195,13 @@ class YourRedisServer
   end
 
   def read_rdb(connection)
-    #read the RDB file
-    rdb_length = connection.gets.chomp
-    rdb = connection.read(rdb_length.to_i)
-    puts "Received RDB file of length: #{rdb_length}"
+    # Read the RDB file from the socket
+    puts "Reading RDB file..."
+    while data = connection.read(1024)
+      # Process the data...
+      puts "RDB data: #{data}"
+    end
+    puts "Finished reading RDB file."
   end
 
   def propagate_command(command)
@@ -211,6 +214,20 @@ class YourRedisServer
         connection.write(resp_command)
       end
     end
+  end
+
+  def handle_propagated_commands(connection)
+    # Handle the propagated commands
+    puts "Handling propagated commands..."
+    while command_string = connection.gets
+      # Decode the command string into a Command object
+      command_array = RESPDecoder.decode(command_string.chomp)
+      command = Command.new(command_array[0], command_array[1..-1])
+
+      # Handle the command using the handle_command method
+      handle_command(Client.new(connection), command, true)
+    end
+    puts "Finished handling propagated commands."
   end
 end
 
