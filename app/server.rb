@@ -233,7 +233,7 @@ class YourRedisServer
       end
       puts "Received data: #{buffer}"
       # get all resp commands
-      commands = buffer.split("\r\n*")
+      commands = buffer.split("*")
       puts "Commands: #{commands}"
     end
   end
