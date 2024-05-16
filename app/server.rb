@@ -229,7 +229,7 @@ class YourRedisServer
 
     while true
       # Read data from the connection into the buffer
-      puts connection.inspect
+      puts "Reading data from connection... #{connection}"
       buffer += connection.read_nonblock(1024, exception: false) rescue nil
       buffer += data if data.is_a?(String)
       break if buffer.empty?
