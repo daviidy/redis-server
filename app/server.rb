@@ -227,21 +227,11 @@ class YourRedisServer
 
   def handle_propagated_commands(buffer, connection)
     while true
-      begin
-        data = connection.read_nonblock(1024, exception: false)
-        if data.is_a?(String)
-          buffer += data
-        elsif data == :wait_readable
-          IO.select([connection])
-          retry
-        else
-          break
-        end
-      rescue IO::WaitReadable
-        IO.select([connection])
-        retry
+      data = connection.read_nonblock(1024, exception: false)
+      if data.is_a?(String)
+        buffer += data
       end
-
+      puts "Received data: #{data}"
       # Try to process commands from the buffer
       while (command_string = buffer.slice!(/\*.*\r\n/))
         puts "Received command string: #{command_string}"
