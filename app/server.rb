@@ -206,7 +206,7 @@ class YourRedisServer
     buffer = ""
     puts "Skipping RDB file..."
     while data = connection.read_nonblock(1024, exception: false)
-      buffer += data
+      buffer += data if data.is_a?(String)
       break if buffer.include?("\r\n*3\r\n$3\r\nSET\r\n") # Break when the first SET command is detected
     end
     # Handle any remaining commands in the buffer
