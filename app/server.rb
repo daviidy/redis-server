@@ -226,7 +226,7 @@ class YourRedisServer
   end
 
   def handle_propagated_commands(buffer, connection)
-    p "Reading data from connection... #{connection}"
+    p "Reading data from connection... #{connection.gets}"
     while true
       # Read data from the connection into the buffer
 
