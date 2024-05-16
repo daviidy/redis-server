@@ -226,14 +226,18 @@ class YourRedisServer
   end
 
   def handle_propagated_commands(buffer, connection)
-      data = connection.read_nonblock(1024, exception: false)
-      if data.is_a?(String)
-        buffer += data
-      end
-      puts "Received data: #{buffer}"
-      # get all resp commands, but keep * as the first character
-      commands = buffer.scan(/\*[^*]*\r\n/)
-      puts "Commands: #{commands}"
+    data = connection.read_nonblock(1024, exception: false)
+    if data.is_a?(String)
+      buffer += data
+    end
+    puts "Received data: #{buffer}"
+    # get all resp commands, but keep * as the first character
+    commands = buffer.scan(/\*[^*]*\r\n/)
+    # handle each command
+    commands.each do |command|
+      array = RESPDecoder.decode(command)
+      handle_command(Client.new(connection), Command.new(array[0], array[1..-1]), true)
+    end
   end
 end
 
