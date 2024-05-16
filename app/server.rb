@@ -232,16 +232,9 @@ class YourRedisServer
         buffer += data
       end
       puts "Received data: #{buffer}"
-      # Try to process commands from the buffer
-      while (command_string = buffer.slice!(/\*.*\r\n/))
-        puts "Received command string: #{command_string}"
-        # Decode the command string into a Command object
-        command_array = RESPDecoder.decode(command_string.chomp)
-        command = Command.new(command_array[0], command_array[1..-1])
-
-        # Handle the command using the handle_command method
-        handle_command(Client.new(connection), command, true)
-      end
+      # get all resp commands
+      commands = buffer.split("\r\n*")
+      puts "Commands: #{commands}"
     end
   end
 end
