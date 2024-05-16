@@ -232,8 +232,8 @@ class YourRedisServer
         buffer += data
       end
       puts "Received data: #{buffer}"
-      # get all resp commands
-      commands = buffer.split("*")
+      # get all resp commands, but keep * as the first character
+      commands = buffer.scan(/\*[^*]*\r\n/)
       puts "Commands: #{commands}"
     end
   end
