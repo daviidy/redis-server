@@ -226,7 +226,6 @@ class YourRedisServer
   end
 
   def handle_propagated_commands(buffer, connection)
-    while true
       data = connection.read_nonblock(1024, exception: false)
       if data.is_a?(String)
         buffer += data
@@ -235,7 +234,6 @@ class YourRedisServer
       # get all resp commands, but keep * as the first character
       commands = buffer.scan(/\*[^*]*\r\n/)
       puts "Commands: #{commands}"
-    end
   end
 end
 
