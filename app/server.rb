@@ -231,7 +231,7 @@ class YourRedisServer
       if data.is_a?(String)
         buffer += data
       end
-      puts "Received data: #{data}"
+      puts "Received data: #{buffer}"
       # Try to process commands from the buffer
       while (command_string = buffer.slice!(/\*.*\r\n/))
         puts "Received command string: #{command_string}"
